@@ -117,7 +117,8 @@ ENDIF()
 # ---[ cpuinfo library
 SET(CPUINFO_SRCS
   src/init.c
-  src/api.c)
+  src/api.c
+  src/cpuinfotobuff.c)
 
 IF(CPUINFO_SUPPORTED_PLATFORM)
   IF(CMAKE_SYSTEM_PROCESSOR MATCHES "^(i[3-6]86|AMD64|x86(_64)?)$" OR IOS_ARCH MATCHES "^(i386|x86_64)$")
@@ -779,6 +780,11 @@ IF(CPUINFO_SUPPORTED_PLATFORM AND CPUINFO_BUILD_TOOLS)
   CPUINFO_TARGET_ENABLE_C99(cpu-info)
   CPUINFO_TARGET_RUNTIME_LIBRARY(cpu-info)
   TARGET_LINK_LIBRARIES(cpu-info PRIVATE cpuinfo)
+
+  ADD_EXECUTABLE(cpu-dumpall tools/cpu-dumpall.c)
+  CPUINFO_TARGET_ENABLE_C99(cpu-dumpall)
+  CPUINFO_TARGET_RUNTIME_LIBRARY(cpu-dumpall)
+  TARGET_LINK_LIBRARIES(cpu-dumpall PRIVATE cpuinfo)
 
   ADD_EXECUTABLE(cache-info tools/cache-info.c)
   CPUINFO_TARGET_ENABLE_C99(cache-info)
