@@ -11,13 +11,18 @@
 #include <string.h>
 #include <errno.h>
 
+#if CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
 #include <x86/cpuid.h>
+#endif
+
+#include <cpuinfo.h>
 
 // ---------------------------------------------------------------------------
 //
 // From cpuid-dump.c
 //
 
+#if CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
 static int snreport_cpuid(char * _buff, size_t _buffLen,
                          struct cpuid_regs regs, uint32_t eax)
 {
@@ -59,6 +64,8 @@ static int snreport_cpuid_brand_string(char * _buff, size_t _buffLen,
 	return(snprintf(_buff, _buffLen, "CPUID %08"PRIX32": %08"PRIX32"-%08"PRIX32"-%08"PRIX32"-%08"PRIX32" [%.16s]\n",
                         eax, regs.eax, regs.ebx, regs.ecx, regs.edx, brand_string));
 }
+
+#endif // of if CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
 
 // ---------------------------------------------------------------------------
 //
@@ -279,9 +286,9 @@ static const char* uarch_to_string(enum cpuinfo_uarch uarch) {
 //
 
 
-int snreport_cache(char * _buff, size_t _buffLen,
-	uint32_t count, const struct cpuinfo_cache* cache,
-	uint32_t level, const char* nonunified_type)
+static int snreport_cache(char * _buff, size_t _buffLen,
+                          uint32_t count, const struct cpuinfo_cache* cache,
+                          uint32_t level, const char* nonunified_type)
 {
     unsigned int buff_used = 0;
     int pf_res = -1;
@@ -405,7 +412,7 @@ int snreport_cache(char * _buff, size_t _buffLen,
 //
 
 
-int snreport_isa(char * _buff, size_t _buffLen)
+static int snreport_isa(char * _buff, size_t _buffLen)
 {
     unsigned int buff_used = 0;
     int pf_res = -1;
@@ -1188,7 +1195,7 @@ int snreport_isa(char * _buff, size_t _buffLen)
 
 // From cpu-info.c
     
-int snreport_cpu_info(char * _buff, size_t _buffLen)
+static int snreport_cpu_info(char * _buff, size_t _buffLen)
 {
     unsigned int buff_used = 0;
     int pf_res = -1;
@@ -1332,6 +1339,8 @@ int cpuinfotobuff(char * _buff, size_t _buffLen)
 
 
     // From cpuid-dump.c
+
+    #if CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
 
     const uint32_t max_base_index = cpuid(0).eax;
     uint32_t max_structured_index = 0, max_trace_index = 0, max_socid_index =0;
@@ -1513,6 +1522,7 @@ int cpuinfotobuff(char * _buff, size_t _buffLen)
             buff_used += pf_res;
         }
     }
+    #endif // if CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64
 
     // From cpu-info.c
 
