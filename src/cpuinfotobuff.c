@@ -17,6 +17,8 @@
 #include <x86/cpuid.h>
 #endif
 
+#include "cpuinfotobuff.h"
+
 // ---------------------------------------------------------------------------
 //
 // From cpuid-dump.c
