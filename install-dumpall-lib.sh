@@ -6,4 +6,5 @@ then
 fi
 
 sudo cp -a build/libcpuinfo.a /usr/local/lib/libcpuinfo-dumpall.a
+sudo cp -a build/deps/clog/libclog.a /usr/local/lib/libcpuinfo-clog.a
 sudo cp -a src/cpuinfotobuff.h /usr/local/include/libcpuinfo/libcpuinfo-dumpall.h
