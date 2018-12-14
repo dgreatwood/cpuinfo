@@ -82,26 +82,45 @@ inline static bool is_whitespace(char c) {
 #endif
 
 static bool uint32_parser(const char* text_start, const char* text_end, void* context) {
-	if (text_start == text_end) {
+	if (text_start >= text_end) {
 		cpuinfo_log_error("failed to parse file %s: file is empty", KERNEL_MAX_FILENAME);
 		return false;
 	}
 
 	uint32_t kernel_max = 0;
 	const char* parsed_end = parse_number(text_start, text_end, &kernel_max);
-	if (parsed_end == text_start) {
-		cpuinfo_log_error("failed to parse file %s: \"%.*s\" is not an unsigned number",
-			KERNEL_MAX_FILENAME, (int) (text_end - text_start), text_start);
-		return false;
-	} else {
-		for (const char* char_ptr = parsed_end; char_ptr != text_end; char_ptr++) {
-			if (!is_whitespace(*char_ptr)) {
-				cpuinfo_log_warning("non-whitespace characters \"%.*s\" following number in file %s are ignored",
-					(int) (text_end - char_ptr), char_ptr, KERNEL_MAX_FILENAME);
-				break;
-			}
-		}
-	}
+	if (parsed_end == text_start)
+        {
+            if ((*text_start) == '-')
+            {
+                parsed_end = parse_number(text_start+1, text_end, &kernel_max);
+                if (parsed_end > (text_start+1))
+                {
+                    cpuinfo_log_warning("Number in file %s: \"%.*s\" is negative, treating as zero",
+                                        KERNEL_MAX_FILENAME,
+                                        (int) (text_end-text_start), text_start);
+
+                    kernel_max = 0;
+                    uint32_t* kernel_max_ptr = (uint32_t*) context;
+                    *kernel_max_ptr = kernel_max;
+                    return true;
+                }
+            }
+            
+            cpuinfo_log_error("failed to parse file %s: \"%.*s\" is not a number",
+                              KERNEL_MAX_FILENAME,
+                              (int) (text_end - text_start), text_start);
+            return false;
+        }
+        
+        for (const char* char_ptr = parsed_end; char_ptr != text_end; char_ptr++)
+        {
+            if (!is_whitespace(*char_ptr)) {
+                cpuinfo_log_warning("non-whitespace characters \"%.*s\" following number in file %s are ignored",
+                                    (int) (text_end - char_ptr), char_ptr, KERNEL_MAX_FILENAME);
+                break;
+            }
+        }
 
 	uint32_t* kernel_max_ptr = (uint32_t*) context;
 	*kernel_max_ptr = kernel_max;
